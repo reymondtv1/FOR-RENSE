@@ -1,0 +1,889 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>A Special Question For You 💕</title>
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Font Awesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <!-- Canvas Confetti Library -->
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+  <!-- Google Fonts: Playfair Display & Plus Jakarta Sans -->
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,800;1,600&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            blushBg: '#FAF5F3',
+            roseAccent: '#E06D76',
+            roseDark: '#B8404B',
+            softPeach: '#FDECEF',
+            goldGlow: '#F7D08A',
+            glassBg: 'rgba(255, 255, 255, 0.75)',
+          },
+          fontFamily: {
+            sans: ['Plus Jakarta Sans', 'sans-serif'],
+            serif: ['Playfair Display', 'serif'],
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      background: radial-gradient(circle at top left, #FFF5F6 0%, #FAF5F3 50%, #F5EBE8 100%);
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* Ambient Glowing Orbs */
+    .glow-orb-1 {
+      position: fixed;
+      top: -10%;
+      left: -10%;
+      width: 45vw;
+      height: 45vw;
+      background: radial-gradient(circle, rgba(247, 208, 138, 0.3) 0%, rgba(255, 255, 255, 0) 70%);
+      border-radius: 50%;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .glow-orb-2 {
+      position: fixed;
+      bottom: -15%;
+      right: -10%;
+      width: 50vw;
+      height: 50vw;
+      background: radial-gradient(circle, rgba(224, 109, 118, 0.25) 0%, rgba(255, 255, 255, 0) 70%);
+      border-radius: 50%;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* Floating Hearts Container */
+    .bg-hearts-container {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 1;
+      overflow: hidden;
+    }
+
+    .heart-bg {
+      position: absolute;
+      color: rgba(224, 109, 118, 0.2);
+      animation: floatUp 12s infinite linear;
+      bottom: -50px;
+    }
+
+    @keyframes floatUp {
+      0% {
+        transform: translateY(0) rotate(0deg) scale(0.8);
+        opacity: 0;
+      }
+      20% { opacity: 0.6; }
+      80% { opacity: 0.6; }
+      100% {
+        transform: translateY(-110vh) rotate(360deg) scale(1.2);
+        opacity: 0;
+      }
+    }
+
+    /* Glassmorphism Styling */
+    .glass-panel {
+      background: rgba(255, 255, 255, 0.82);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid rgba(255, 255, 255, 0.9);
+      box-shadow: 0 20px 40px -15px rgba(184, 64, 75, 0.08);
+    }
+
+    /* Dynamic Reaction Card Popup */
+    .reaction-popup {
+      transition: all 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+
+    /* Selection Card Styling */
+    .option-card {
+      transition: all 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+
+    .option-card:hover {
+      transform: translateY(-3px);
+    }
+
+    .option-card.selected {
+      border-color: #E06D76 !important;
+      background-color: #FFF2F4 !important;
+      box-shadow: 0 8px 20px -6px rgba(224, 109, 118, 0.3);
+    }
+
+    /* Pulse Heart Effect */
+    .pulse-heart {
+      animation: heartBeat 1.5s infinite ease-in-out;
+    }
+
+    @keyframes heartBeat {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.12); }
+    }
+
+    /* Shake animation */
+    .shake {
+      animation: shake 0.4s ease-in-out;
+    }
+
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      20%, 60% { transform: translateX(-8px); }
+      40%, 80% { transform: translateX(8px); }
+    }
+
+    /* Runaway NO Button transition */
+    #noBtn {
+      transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+  </style>
+</head>
+<body class="text-gray-800 flex flex-col justify-between relative selection:bg-roseAccent selection:text-white">
+
+  <!-- Glow Elements -->
+  <div class="glow-orb-1"></div>
+  <div class="glow-orb-2"></div>
+
+  <!-- Floating Hearts Layer -->
+  <div class="bg-hearts-container" id="heartsContainer"></div>
+
+  <!-- Top Right Utility Buttons -->
+  <div class="fixed top-5 right-5 z-50 flex items-center gap-2">
+    <!-- Image URL Config Modal Button -->
+    <button onclick="toggleImageModal()" class="bg-white/80 hover:bg-white text-gray-700 p-3 rounded-full shadow-lg border border-white flex items-center justify-center transition hover:scale-110 active:scale-95" title="Custom Photo Links">
+      <i class="fa-solid fa-image text-sm"></i>
+    </button>
+    <!-- Music Audio Toggle Button -->
+    <button id="musicToggleBtn" onclick="toggleAudio()" class="bg-white/80 hover:bg-white text-roseDark p-3 rounded-full shadow-lg border border-white flex items-center justify-center transition hover:scale-110 active:scale-95" title="Toggle Soft Sound">
+      <i id="musicIcon" class="fa-solid fa-volume-xmark text-sm"></i>
+    </button>
+  </div>
+
+  <!-- ==================== 0. EASY IMAGE SETUP MODAL ==================== -->
+  <div id="imageConfigModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm hidden transition-opacity duration-300">
+    <div class="glass-panel max-w-md w-full rounded-3xl p-6 shadow-2xl relative text-left">
+      <button onclick="toggleImageModal()" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600 p-2">
+        <i class="fa-solid fa-xmark text-lg"></i>
+      </button>
+
+      <div class="flex items-center gap-2 mb-4">
+        <div class="w-8 h-8 bg-roseAccent/20 text-roseDark rounded-xl flex items-center justify-center">
+          <i class="fa-solid fa-camera"></i>
+        </div>
+        <h3 class="font-bold text-gray-800 text-lg">Change Reaction GIFs</h3>
+      </div>
+      
+      <p class="text-xs text-gray-500 mb-4 leading-relaxed">
+        Paste GIF or image URLs below to customize your sad & happy reactions!
+      </p>
+
+      <div class="space-y-4">
+        <div>
+          <label class="block text-xs font-bold text-gray-600 uppercase mb-1">Sad GIF URL (when "No" is hovered):</label>
+          <input type="text" id="sadPicUrlInput" class="w-full px-3 py-2 rounded-xl bg-white border border-gray-200 text-xs focus:outline-none focus:border-roseAccent" placeholder="https://media.giphy.com/.../giphy.gif">
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold text-gray-600 uppercase mb-1">Happy GIF URL (when "Yes" is clicked):</label>
+          <input type="text" id="happyPicUrlInput" class="w-full px-3 py-2 rounded-xl bg-white border border-gray-200 text-xs focus:outline-none focus:border-roseAccent" placeholder="https://media.giphy.com/.../giphy.gif">
+        </div>
+
+        <button onclick="saveCustomPhotoUrls()" class="w-full py-2.5 bg-roseDark text-white font-semibold text-xs rounded-xl shadow-md hover:bg-roseAccent transition">
+          Save GIFs ✨
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== 1. LOCK SCREEN / ENTRANCE ==================== -->
+  <div id="passwordModal" class="fixed inset-0 z-40 flex items-center justify-center p-4 bg-blushBg/80 backdrop-blur-md transition-opacity duration-700">
+    <div id="lockCard" class="glass-panel max-w-md w-full rounded-3xl p-8 shadow-2xl text-center relative overflow-hidden border border-white">
+      
+      <!-- Icon Badge -->
+      <div class="w-16 h-16 bg-gradient-to-tr from-roseAccent to-softPeach rounded-2xl flex items-center justify-center mx-auto mb-5 shadow-sm pulse-heart">
+        <i class="fa-solid fa-key text-white text-2xl"></i>
+      </div>
+
+      <h2 class="text-2xl md:text-3xl font-bold font-serif text-gray-900 mb-2">SEKRET NI NGA WEBSITE</h2>
+      <p class="text-xs md:text-sm text-gray-500 mb-6">Enter our special key para ma unlock your message...</p>
+
+      <!-- Password Input Form -->
+      <form onsubmit="checkPassword(event)" class="space-y-4">
+        <div>
+          <input 
+            type="password" 
+            id="passwordInput" 
+            placeholder="Enter password..." 
+            class="w-full px-5 py-3.5 rounded-2xl bg-white/90 border border-roseAccent/30 focus:border-roseAccent focus:ring-2 focus:ring-roseAccent/20 focus:outline-none text-center text-lg font-semibold tracking-wider text-roseDark transition shadow-inner placeholder-gray-300"
+            autocomplete="off"
+            required
+          >
+        </div>
+
+        <button 
+          type="submit" 
+          class="w-full py-3.5 bg-gradient-to-r from-roseAccent to-roseDark hover:from-roseDark hover:to-roseAccent text-white font-semibold rounded-2xl shadow-lg shadow-roseAccent/25 hover:shadow-xl transition transform active:scale-95 flex items-center justify-center gap-2 cursor-pointer"
+        >
+          <span>Unlock Page</span>
+          <i class="fa-solid fa-sparkles text-xs"></i>
+        </button>
+      </form>
+
+      <!-- Password Hints & Fallback -->
+      <div class="mt-6 pt-5 border-t border-roseAccent/10 text-xs text-gray-500 space-y-2">
+        <p><i class="fa-solid fa-lightbulb text-goldGlow mr-1"></i> <b>Hint:</b> <span class="underline decoration-roseAccent decoration-2 font-medium">Kanus a ta nagkaila</span></p>
+        <button onclick="autoUnlock()" class="text-roseDark hover:text-roseAccent underline font-medium transition cursor-pointer mt-1 inline-block">
+          (Forgot key? Click here to bypass ✨)
+        </button>
+      </div>
+
+      <p id="errorMsg" class="text-roseDark text-xs font-semibold mt-3 hidden"></p>
+    </div>
+  </div>
+
+  <!-- ==================== 2. MAIN PROPOSAL & CUSTOMIZER CONTENT ==================== -->
+  <main id="mainContent" class="opacity-0 transition-opacity duration-1000 max-w-2xl mx-auto px-4 py-10 md:py-14 w-full relative z-10 flex-grow">
+    
+    <!-- Romantic Header Card -->
+    <div class="glass-panel rounded-3xl p-6 md:p-10 shadow-xl text-center mb-8 border border-white relative overflow-hidden">
+      <span class="inline-block px-4 py-1.5 bg-softPeach text-roseDark text-xs font-bold tracking-wider uppercase rounded-full mb-3">
+        Para ni nimo 💕
+      </span>
+      
+      <h1 class="text-3xl md:text-5xl font-extrabold font-serif text-gray-900 mb-3">
+        Hi gwapaaaaa...
+      </h1>
+      
+      <div class="w-12 h-1 bg-gradient-to-r from-transparent via-roseAccent to-transparent mx-auto mb-5 rounded-full"></div>
+
+      <p class="text-gray-600 text-sm md:text-base leading-relaxed max-w-lg mx-auto font-light">
+        When im with you ba my day filled with happinesss and I was thinking it's time we go make another memory together. ✨
+      </p>
+
+      <div class="mt-6 p-3.5 rounded-2xl bg-white/60 inline-block text-roseDark font-medium text-xs md:text-sm italic border border-roseAccent/20">
+        "Ikaw akong pirmi hunahunaon every day." ❤️
+      </div>
+    </div>
+
+    <!-- ==================== PROPOSAL SECTION ==================== -->
+    <div id="proposalSection" class="glass-panel rounded-3xl p-6 md:p-10 shadow-xl text-center border border-white relative">
+      
+      <!-- DEFAULT / NORMAL HEADER -->
+      <div id="normalHeader" class="mb-4">
+        <div class="text-5xl md:text-6xl mb-3 pulse-heart inline-block">🌹</div>
+        <h2 class="text-2xl md:text-4xl font-extrabold font-serif text-gray-900 tracking-tight">
+          Will You Go On A Date With Me?
+        </h2>
+        <p class="text-gray-500 text-xs md:text-sm mt-2">
+          (Choose wisely... Isa ray correct answer ani hehe! 😉)
+        </p>
+      </div>
+
+      <!-- DYNAMIC SAD REACTION POPUP (TRIPPED WHEN NO IS HOVERED/TAPPED) -->
+      <div id="sadReactionCard" class="reaction-popup hidden mb-6 p-4 rounded-3xl bg-rose-50/90 border-2 border-roseAccent/40 max-w-xs mx-auto text-center transform scale-95 opacity-0">
+        <div class="relative w-48 h-56 mx-auto mb-2 flex items-center justify-center filter drop-shadow-lg overflow-hidden rounded-2xl">
+          <img id="sadImg" src="https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExZ3BvbGN4OW1vdm1oN25wbDJ5YXAwbmpmYTg4MzV3cXg3bnV2eTg4biZlcD12MV9naWZzX3NlYXJjaCZjdD1n/lR3pWtb80Hz22UjrYj/giphy.gif" alt="Begging Sad Reaction GIF" class="w-full h-full object-cover">
+          <div class="absolute bottom-0 inset-x-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent rounded-b-2xl p-2">
+            <span class="text-white text-xs font-bold drop-shadow">PLEASE SAY YES! 🥺💔</span>
+          </div>
+        </div>
+        <p class="text-roseDark font-extrabold text-sm">Awa sadd nako! 😭</p>
+        <p class="text-xs text-gray-500 mt-1">Press YES para ma happy ko balikkk! ✨</p>
+      </div>
+
+      <!-- Proposal Action Buttons -->
+      <div class="flex flex-col sm:flex-row items-center justify-center gap-4 mt-6 min-h-[120px] relative px-4" id="buttonContainer">
+        <!-- YES BUTTON -->
+        <button 
+          id="yesBtn" 
+          onclick="handleYesClick()" 
+          class="w-full sm:w-auto px-9 py-4 bg-gradient-to-r from-roseAccent via-roseDark to-roseAccent text-white font-bold text-lg rounded-2xl shadow-lg shadow-roseAccent/30 hover:shadow-2xl transition-all duration-300 transform hover:scale-105 active:scale-95 flex items-center justify-center gap-2 z-20 cursor-pointer"
+        >
+          <span>YES! I'd Love To! 🎉</span>
+          <i class="fa-solid fa-heart text-sm"></i>
+        </button>
+
+        <!-- RUNAWAY NO BUTTON -->
+        <button 
+          id="noBtn" 
+          onmouseenter="runawayNoBtn()" 
+          onclick="runawayNoBtn()" 
+          class="w-full sm:w-auto px-8 py-4 bg-white/90 hover:bg-white text-gray-600 font-semibold text-lg rounded-2xl border border-gray-200 shadow-sm transition-all duration-200 z-10 cursor-pointer"
+        >
+          <span id="noBtnText">No, thanks 😜</span>
+        </button>
+      </div>
+
+      <p id="funnyTeaseText" class="text-roseDark text-xs font-semibold mt-4 min-h-[20px] transition-all"></p>
+    </div>
+
+    <!-- ==================== 3. DATE CHOICE CUSTOMIZER & HAPPY REACTION ==================== -->
+    <div id="dateCustomizerCard" class="hidden glass-panel rounded-3xl p-6 md:p-10 shadow-2xl border border-white text-center relative mt-8">
+      
+      <!-- HAPPY REACTION PHOTO & CELEBRATION HEADER -->
+      <div class="mb-8">
+        <!-- Happy Reaction Picture Card -->
+        <div id="happyReactionCard" class="w-48 h-48 md:w-56 md:h-56 mx-auto mb-5 rounded-3xl overflow-hidden border-4 border-white shadow-xl bg-gray-100 relative group pulse-heart">
+          <img id="happyImg" src="https://media.giphy.com/media/v1.Y2lkPWVjZjA1ZTQ3eW1rNDh0MXY3ZHlneDRyY2oybWhhZWkwNzM0eWdsYmF0bzRidDh1NSZlcD12MV9naWZzX3NlYXJjaCZjdD1n/PklKBQ4bj7XXRHByqs/giphy.gif" alt="Happy Celebration GIF" class="w-full h-full object-cover">
+          <div class="absolute inset-0 bg-gradient-to-t from-roseDark/80 via-transparent to-transparent flex items-end justify-center p-3">
+            <span class="text-white text-xs font-extrabold tracking-wider uppercase drop-shadow">YAY! BEST DAY EVER! 🥰🎉</span>
+          </div>
+        </div>
+
+        <span class="text-3xl">💖🥳✨</span>
+        <h2 class="text-3xl md:text-4xl font-extrabold font-serif text-roseDark mt-1">
+          SHE SAID YES!
+        </h2>
+        <p class="text-gray-600 text-xs md:text-sm mt-1">
+          Help me customize our date flow! Pick your favorites below:
+        </p>
+      </div>
+
+      <div class="space-y-8 text-left">
+        
+        <!-- STEP 1: AFTER CHURCH ACTIVITY -->
+        <div>
+          <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-3 flex items-center gap-2">
+            <span class="w-5 h-5 bg-roseAccent text-white rounded-full flex items-center justify-center text-[10px]">1</span>
+            <span>What do you prefer after Church? ⛪</span>
+          </label>
+          
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-3" id="activityGrid">
+            <div onclick="selectOption('activity', 'Photobooth / Photoshoot 📸', this)" class="option-card selected p-3.5 rounded-2xl bg-white border border-gray-200 cursor-pointer text-center">
+              <div class="text-2xl mb-1">📸</div>
+              <div class="text-xs font-bold text-gray-800">Photobooth / Photoshoot</div>
+            </div>
+
+            <div onclick="selectOption('activity', 'Arcade Games 🕹️', this)" class="option-card p-3.5 rounded-2xl bg-white border border-gray-200 cursor-pointer text-center">
+              <div class="text-2xl mb-1">🕹️</div>
+              <div class="text-xs font-bold text-gray-800">Arcade Games</div>
+            </div>
+
+            <div onclick="selectOption('activity', 'Watch Cinema Movie 🍿', this)" class="option-card p-3.5 rounded-2xl bg-white border border-gray-200 cursor-pointer text-center">
+              <div class="text-2xl mb-1">🍿</div>
+              <div class="text-xs font-bold text-gray-800">Watch Cinema</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- STEP 2: EAT & RELAX STYLE -->
+        <div>
+          <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-3 flex items-center gap-2">
+            <span class="w-5 h-5 bg-roseAccent text-white rounded-full flex items-center justify-center text-[10px]">2</span>
+            <span>Where should we eat / relax? 🍽️</span>
+          </label>
+
+          <div class="grid grid-cols-2 gap-3" id="eatGrid">
+            <div onclick="selectOption('eat', 'Romantic Picnic 🧺', this)" class="option-card selected p-3.5 rounded-2xl bg-white border border-gray-200 cursor-pointer text-center">
+              <div class="text-2xl mb-1">🧺</div>
+              <div class="text-xs font-bold text-gray-800">Romantic Picnic</div>
+            </div>
+
+            <div onclick="selectOption('eat', 'Restaurant Date 🍷', this)" class="option-card p-3.5 rounded-2xl bg-white border border-gray-200 cursor-pointer text-center">
+              <div class="text-2xl mb-1">🍷</div>
+              <div class="text-xs font-bold text-gray-800">Restaurant Date</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- STEP 3: FAVORITE FOODS / SNACKS -->
+        <div>
+          <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-3 flex items-center gap-2">
+            <span class="w-5 h-5 bg-roseAccent text-white rounded-full flex items-center justify-center text-[10px]">3</span>
+            <span>What favorite food / snacks to buy? 🍩</span>
+          </label>
+
+          <div class="grid grid-cols-3 gap-3" id="foodGrid">
+            <div onclick="selectOption('food', 'Jollibee 🍗', this)" class="option-card selected p-3.5 rounded-2xl bg-white border border-gray-200 cursor-pointer text-center">
+              <div class="text-2xl mb-1">🍗</div>
+              <div class="text-xs font-bold text-gray-800">Jollibee</div>
+            </div>
+
+            <div onclick="selectOption('food', 'Donuts 🍩', this)" class="option-card p-3.5 rounded-2xl bg-white border border-gray-200 cursor-pointer text-center">
+              <div class="text-2xl mb-1">🍩</div>
+              <div class="text-xs font-bold text-gray-800">Donuts</div>
+            </div>
+
+            <div onclick="selectOption('food', 'Junk Foods / Snacks 🍿', this)" class="option-card p-3.5 rounded-2xl bg-white border border-gray-200 cursor-pointer text-center">
+              <div class="text-2xl mb-1">🍿</div>
+              <div class="text-xs font-bold text-gray-800">Junk Foods</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- STEP 4: OUTFIT STYLE -->
+        <div>
+          <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-3 flex items-center gap-2">
+            <span class="w-5 h-5 bg-roseAccent text-white rounded-full flex items-center justify-center text-[10px]">4</span>
+            <span>What outfit style are we wearing? 👗</span>
+          </label>
+
+          <div class="grid grid-cols-2 gap-3" id="outfitGrid">
+            <div onclick="selectOption('outfit', 'Tito / Tita Style 👓', this)" class="option-card selected p-3.5 rounded-2xl bg-white border border-gray-200 cursor-pointer text-center">
+              <div class="text-2xl mb-1">👓</div>
+              <div class="text-xs font-bold text-gray-800">Tito / Tita Style</div>
+              <div class="text-[10px] text-gray-400 mt-0.5">Clean, Aesthetic & Classy</div>
+            </div>
+
+            <div onclick="selectOption('outfit', 'Geng Geng Style 🔥', this)" class="option-card p-3.5 rounded-2xl bg-white border border-gray-200 cursor-pointer text-center">
+              <div class="text-2xl mb-1">🔥</div>
+              <div class="text-xs font-bold text-gray-800">Geng Geng Style</div>
+              <div class="text-[10px] text-gray-400 mt-0.5">Streetwear, Cool & Comfy</div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- ==================== 4. RESULT SHARING & ITINERARY FLOW CARD ==================== -->
+      <div class="mt-8 pt-6 border-t border-roseAccent/20">
+        
+        <!-- Live Detailed Itinerary Flow Card -->
+        <div id="summaryCard" class="p-5 md:p-6 rounded-3xl bg-white/90 border border-roseAccent/30 shadow-md text-left mb-6 relative overflow-hidden">
+          <div class="flex items-center justify-between border-b border-roseAccent/15 pb-3 mb-4">
+            <div>
+              <span class="text-xs font-extrabold text-roseDark uppercase tracking-wider block">OUR DATE ITINERARY FLOW 🗺️</span>
+              <span class="text-[10px] font-semibold text-gray-400">CEBU SPECIAL DATE PASS • CONFIRMED ❤️</span>
+            </div>
+            <span class="text-2xl">✨</span>
+          </div>
+
+          <!-- Outfit Badge -->
+          <div class="mb-4 p-2.5 rounded-xl bg-softPeach/70 border border-roseAccent/20 text-center">
+            <span class="text-xs font-bold text-roseDark">👗 Matching Dress Code: </span>
+            <span id="summaryOutfit" class="text-xs font-extrabold text-gray-800">Tito / Tita Style 👓</span>
+          </div>
+
+          <!-- Timeline Steps -->
+          <div class="space-y-3.5 text-xs md:text-sm text-gray-700 relative pl-2">
+            
+            <div class="flex items-start gap-3">
+              <span class="font-bold text-roseDark min-w-[70px]">9:00 AM</span>
+              <div>
+                <span class="font-bold text-gray-800">Church Day 🙏</span>
+                <p class="text-[11px] text-gray-400">Blessings & quiet morning together (9:00 AM - 12:00 PM)</p>
+              </div>
+            </div>
+
+            <div class="flex items-start gap-3">
+              <span class="font-bold text-roseDark min-w-[70px]">12:00 PM</span>
+              <div>
+                <span id="summaryActivity" class="font-bold text-gray-800">Photobooth / Photoshoot 📸</span>
+                <p class="text-[11px] text-gray-400">Capturing sweet memories together after church</p>
+              </div>
+            </div>
+
+            <div class="flex items-start gap-3">
+              <span class="font-bold text-roseDark min-w-[70px]">12:50 PM</span>
+              <div>
+                <span id="summaryEat" class="font-bold text-gray-800">Lunch Time + Snack Run 🍽️</span>
+                <p class="text-[11px] text-gray-400">Snacks/Food to buy: <span id="summaryFood" class="font-bold text-roseDark">Jollibee 🍗</span></p>
+              </div>
+            </div>
+
+            <div class="flex items-start gap-3">
+              <span class="font-bold text-roseDark min-w-[70px]">1:50 PM</span>
+              <div>
+                <span class="font-bold text-gray-800">Arcade & Fun Games 🕹️</span>
+                <p class="text-[11px] text-gray-400">Playing & winning prizes for you!</p>
+              </div>
+            </div>
+
+            <div class="flex items-start gap-3">
+              <span class="font-bold text-roseDark min-w-[70px]">3:00 PM</span>
+              <div>
+                <span class="font-bold text-gray-800">Scenic Ride to TOPS Cebu 🌅</span>
+                <p class="text-[11px] text-gray-400">Long ride up the mountains & enjoying sunset overlooking Cebu!</p>
+              </div>
+            </div>
+
+            <div class="flex items-start gap-3">
+              <span class="font-bold text-roseDark min-w-[70px]">7:00 PM</span>
+              <div>
+                <span class="font-bold text-gray-800">Safe Ride Home 🚗❤️</span>
+                <p class="text-[11px] text-gray-400">Ending the day with full hearts (7:00 PM - 8:00 PM)</p>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- Share Buttons Grid -->
+        <div class="flex flex-col sm:flex-row gap-3">
+          <!-- WhatsApp Send Button -->
+          <button 
+            onclick="sendViaWhatsApp()" 
+            class="flex-1 py-3.5 px-4 bg-emerald-500 hover:bg-emerald-600 text-white font-bold text-xs md:text-sm rounded-xl shadow-md transition transform active:scale-95 flex items-center justify-center gap-2 cursor-pointer"
+          >
+            <i class="fa-brands fa-whatsapp text-lg"></i>
+            <span>Send via WhatsApp</span>
+          </button>
+
+          <!-- SMS Send Button -->
+          <button 
+            onclick="sendViaSMS()" 
+            class="flex-1 py-3.5 px-4 bg-sky-500 hover:bg-sky-600 text-white font-bold text-xs md:text-sm rounded-xl shadow-md transition transform active:scale-95 flex items-center justify-center gap-2 cursor-pointer"
+          >
+            <i class="fa-solid fa-comment-sms text-lg"></i>
+            <span>Send via Text / SMS</span>
+          </button>
+
+          <!-- Copy Text Button -->
+          <button 
+            onclick="copySummaryToClipboard()" 
+            class="py-3.5 px-4 bg-gray-800 hover:bg-gray-900 text-white font-bold text-xs md:text-sm rounded-xl shadow-md transition transform active:scale-95 flex items-center justify-center gap-2 cursor-pointer"
+            title="Copy itinerary choices"
+          >
+            <i class="fa-regular fa-copy text-lg"></i>
+            <span class="hidden sm:inline">Copy Plan</span>
+          </button>
+        </div>
+
+        <p id="copyToast" class="text-xs text-roseDark font-semibold mt-3 hidden">
+          ✨ Itinerary choices copied! Paste them to send to him 💕
+        </p>
+
+      </div>
+
+    </div>
+
+  </main>
+
+  <!-- Footer -->
+  <footer class="py-6 text-center text-xs text-gray-400 relative z-10">
+    Made with ❤️ forever and always.
+  </footer>
+
+  <!-- Sound & Interactive Synthesis Scripts -->
+  <script>
+    let audioCtx = null;
+    let isMusicPlaying = false;
+
+    function initAudio() {
+      if (!audioCtx) {
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      }
+    }
+
+    // Chime sound for interactions
+    function playChimeSound() {
+      initAudio();
+      if (!audioCtx) return;
+
+      const notes = [523.25, 659.25, 783.99, 1046.50];
+      notes.forEach((freq, index) => {
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(freq, audioCtx.currentTime + index * 0.1);
+        
+        gain.gain.setValueAtTime(0.12, audioCtx.currentTime + index * 0.1);
+        gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + index * 0.1 + 0.4);
+        
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        
+        osc.start(audioCtx.currentTime + index * 0.1);
+        osc.stop(audioCtx.currentTime + index * 0.1 + 0.5);
+      });
+    }
+
+    // Sad Shock Sound effect when No is hovered
+    function playSadSound() {
+      initAudio();
+      if (!audioCtx) return;
+
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+
+      osc.type = 'sawtooth';
+      osc.frequency.setValueAtTime(320, audioCtx.currentTime);
+      osc.frequency.linearRampToValueAtTime(140, audioCtx.currentTime + 0.3);
+
+      gain.gain.setValueAtTime(0.08, audioCtx.currentTime);
+      gain.gain.linearRampToValueAtTime(0.001, audioCtx.currentTime + 0.3);
+
+      osc.connect(gain);
+      gain.connect(audioCtx.destination);
+
+      osc.start();
+      osc.stop(audioCtx.currentTime + 0.3);
+    }
+
+    // Ambient music loop
+    let ambientTimer = null;
+    function toggleAudio() {
+      initAudio();
+      const icon = document.getElementById('musicIcon');
+      
+      if (isMusicPlaying) {
+        isMusicPlaying = false;
+        clearInterval(ambientTimer);
+        icon.className = "fa-solid fa-volume-xmark text-sm";
+      } else {
+        isMusicPlaying = true;
+        icon.className = "fa-solid fa-music text-sm pulse-heart text-roseDark";
+        
+        const chords = [
+          [261.63, 329.63, 392.00],
+          [220.00, 261.63, 329.63],
+          [174.61, 220.00, 261.63],
+          [196.00, 246.94, 293.66]
+        ];
+        let chordIdx = 0;
+
+        playChord(chords[0]);
+        ambientTimer = setInterval(() => {
+          chordIdx = (chordIdx + 1) % chords.length;
+          playChord(chords[chordIdx]);
+        }, 3200);
+      }
+    }
+
+    function playChord(notes) {
+      if (!isMusicPlaying || !audioCtx) return;
+      notes.forEach(freq => {
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+        gain.gain.setValueAtTime(0.018, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + 3.0);
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start();
+        osc.stop(audioCtx.currentTime + 3.1);
+      });
+    }
+
+    // Floating Hearts Background
+    function createFloatingHearts() {
+      const container = document.getElementById('heartsContainer');
+      const heartIcons = ['💖', '💕', '💗', '🌸', '✨', '❤️'];
+      
+      for (let i = 0; i < 18; i++) {
+        const heart = document.createElement('div');
+        heart.className = 'heart-bg';
+        heart.innerHTML = heartIcons[Math.floor(Math.random() * heartIcons.length)];
+        heart.style.left = `${Math.random() * 100}%`;
+        heart.style.animationDuration = `${7 + Math.random() * 7}s`;
+        heart.style.animationDelay = `${Math.random() * 5}s`;
+        heart.style.fontSize = `${14 + Math.random() * 18}px`;
+        container.appendChild(heart);
+      }
+    }
+
+    // ==================== IMAGE SETUP MODAL CONTROLS ====================
+    function toggleImageModal() {
+      const modal = document.getElementById('imageConfigModal');
+      modal.classList.toggle('hidden');
+    }
+
+    function saveCustomPhotoUrls() {
+      const sadUrl = document.getElementById('sadPicUrlInput').value.trim();
+      const happyUrl = document.getElementById('happyPicUrlInput').value.trim();
+
+      if (sadUrl) document.getElementById('sadImg').src = sadUrl;
+      if (happyUrl) document.getElementById('happyImg').src = happyUrl;
+
+      toggleImageModal();
+    }
+
+    // ==================== 1. PASSWORD UNLOCK LOGIC ====================
+    function checkPassword(e) {
+      e.preventDefault();
+      const input = document.getElementById('passwordInput').value.trim();
+      const lockCard = document.getElementById('lockCard');
+      const errorMsg = document.getElementById('errorMsg');
+
+      if (input !== "") {
+        unlockWebsite();
+      } else {
+        lockCard.classList.add('shake');
+        errorMsg.textContent = "Please enter password or click bypass link below! 💕";
+        errorMsg.classList.remove('hidden');
+        setTimeout(() => lockCard.classList.remove('shake'), 400);
+      }
+    }
+
+    function autoUnlock() {
+      unlockWebsite();
+    }
+
+    function unlockWebsite() {
+      playChimeSound();
+      const passwordModal = document.getElementById('passwordModal');
+      const mainContent = document.getElementById('mainContent');
+
+      passwordModal.classList.add('opacity-0');
+      setTimeout(() => {
+        passwordModal.classList.add('hidden');
+        mainContent.classList.remove('opacity-0');
+      }, 700);
+    }
+
+    // ==================== 2. RUNAWAY NO BUTTON & SAD REACTION ====================
+    let runawayCount = 0;
+    const teases = [
+      "Wait... invalid button target! 😜",
+      "Nope, wrong button! Try again! Hehe",
+      "Awa sadd face nako above! 😭",
+      "No option is unavailable for today! ❤️",
+      "Say YES na pleaseee! 🥺"
+    ];
+
+    function runawayNoBtn() {
+      playSadSound();
+      const noBtn = document.getElementById('noBtn');
+      const teaseText = document.getElementById('funnyTeaseText');
+      const sadCard = document.getElementById('sadReactionCard');
+
+      // Show Sad Reaction Card Popup
+      if (sadCard.classList.contains('hidden')) {
+        sadCard.classList.remove('hidden');
+        setTimeout(() => {
+          sadCard.classList.remove('opacity-0', 'scale-95');
+          sadCard.classList.add('opacity-100', 'scale-100');
+        }, 20);
+      }
+
+      runawayCount++;
+
+      // Make button jump to random position
+      const x = (Math.random() - 0.5) * 220;
+      const y = (Math.random() - 0.5) * 160;
+
+      noBtn.style.transform = `translate(${x}px, ${y}px)`;
+      
+      // Update funny tease message
+      teaseText.textContent = teases[runawayCount % teases.length];
+
+      // Grow the Yes button slightly each time
+      const yesBtn = document.getElementById('yesBtn');
+      const currentScale = 1 + (runawayCount * 0.05);
+      yesBtn.style.transform = `scale(${Math.min(currentScale, 1.35)})`;
+    }
+
+    // ==================== 3. YES CLICK & DATE CUSTOMIZER ====================
+    let userSelections = {
+      activity: 'Photobooth / Photoshoot 📸',
+      eat: 'Romantic Picnic 🧺',
+      food: 'Jollibee 🍗',
+      outfit: 'Tito / Tita Style 👓'
+    };
+
+    function handleYesClick() {
+      playChimeSound();
+
+      // Launch Confetti
+      if (typeof confetti === 'function') {
+        confetti({
+          particleCount: 120,
+          spread: 80,
+          origin: { y: 0.6 }
+        });
+        setTimeout(() => {
+          confetti({
+            particleCount: 80,
+            angle: 60,
+            spread: 55,
+            origin: { x: 0 }
+          });
+          confetti({
+            particleCount: 80,
+            angle: 120,
+            spread: 55,
+            origin: { x: 1 }
+          });
+        }, 300);
+      }
+
+      // Hide Proposal, Show Customizer
+      const proposalSection = document.getElementById('proposalSection');
+      const dateCustomizerCard = document.getElementById('dateCustomizerCard');
+
+      proposalSection.classList.add('hidden');
+      dateCustomizerCard.classList.remove('hidden');
+
+      window.scrollTo({
+        top: dateCustomizerCard.offsetTop - 30,
+        behavior: 'smooth'
+      });
+    }
+
+    function selectOption(category, value, cardElement) {
+      playChimeSound();
+      userSelections[category] = value;
+
+      // Update UI selection card highlight
+      const gridId = category + 'Grid';
+      const container = document.getElementById(gridId);
+      const cards = container.querySelectorAll('.option-card');
+      cards.forEach(c => c.classList.remove('selected'));
+      cardElement.classList.add('selected');
+
+      // Update Summary Card
+      if (category === 'activity') document.getElementById('summaryActivity').textContent = value;
+      if (category === 'eat') document.getElementById('summaryEat').textContent = value + ' Lunch';
+      if (category === 'food') document.getElementById('summaryFood').textContent = value;
+      if (category === 'outfit') document.getElementById('summaryOutfit').textContent = value;
+    }
+
+    // ==================== 4. RESULT SHARING ====================
+    function formatMessageText() {
+      return `I SAID YES TO OUR DATE! ❤️✨\n\n` +
+             `Here is our confirmed date flow:\n` +
+             `👗 Outfit: ${userSelections.outfit}\n` +
+             `⛪ 9:00 AM - Church\n` +
+             `📸 12:00 PM - ${userSelections.activity}\n` +
+             `🍽️ 12:50 PM - ${userSelections.eat} (Snacks: ${userSelections.food})\n` +
+             `🕹️ 1:50 PM - Arcade Games\n` +
+             `🌅 3:00 PM - Ride to TOPS Cebu for Sunset\n` +
+             `🚗 7:00 PM - Safe Ride Home\n\n` +
+             `Can't wait for our date! 🥰`;
+    }
+
+    function sendViaWhatsApp() {
+      const text = encodeURIComponent(formatMessageText());
+      window.open(`https://wa.me/?text=${text}`, '_blank');
+    }
+
+    function sendViaSMS() {
+      const text = encodeURIComponent(formatMessageText());
+      window.open(`sms:?&body=${text}`, '_blank');
+    }
+
+    function copySummaryToClipboard() {
+      const text = formatMessageText();
+      navigator.clipboard.writeText(text).then(() => {
+        const toast = document.getElementById('copyToast');
+        toast.classList.remove('hidden');
+        setTimeout(() => toast.classList.add('hidden'), 3500);
+      });
+    }
+
+    // Initialize on page load
+    window.addEventListener('DOMContentLoaded', () => {
+      createFloatingHearts();
+    });
+  </script>
+</body>
+</html>
